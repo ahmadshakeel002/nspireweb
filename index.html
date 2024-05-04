@@ -176,7 +176,7 @@
       }
 
       function appendInput(){
-        $('#input, #output').removeAttr('id');
+        $('#input').removeAttr('id');
 
         var div = $('<div>', {
           'class': 'item justify-content-end py-2'
@@ -195,7 +195,7 @@
 
       function appendOutput(data)
       {
-          $('#input, #output').removeAttr('id');
+          $('#output').removeAttr('id');
           // Create a <div> element with the specified class and id
           var div = $('<div>', {
             'class': 'item justify-content-start py-2 response'
@@ -215,7 +215,7 @@
           $('#parent').append(div);
           console.log("Posting data:"+input);
           $.ajax({
-            url: '/testapi.html',
+            url: 'http://localhost:5000/test',
             type: 'POST',
             contentType: 'application/json',
             data: data, // Replace with your data object
