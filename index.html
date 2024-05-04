@@ -232,7 +232,7 @@
           });
       }
 
-      var skipKeys=["Shift","Alt"];
+      var skipKeys=["Shift","Control","ArrowLeft","ArrowRight"];
       var input = "";
 
       appendInput();
@@ -248,7 +248,7 @@
             appendOutput(input);
             input="";
         }
-        else if(key==='Control')
+        else if(key==='Alt')
         {
             input="Capturing...";
             $('#input').text(input);
