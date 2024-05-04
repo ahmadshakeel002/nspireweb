@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="assets/css/style.css" />
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <title>Math</title>
   </head>
   <body>
@@ -118,18 +119,16 @@
             <div class="parent mt-4" id="parent">
               <!-- <div class="item justify-content-end py-2">
                 <p class="mb-0 fs-20">\(\frac{5}{8}\)</p>
-              </div> -->
+              </div>
               <div class="item justify-content-end py-2">
                 <p class="mb-0 fs-20" id="command">\(\frac{5}{8}\)</p>
               </div>
               <div class="item justify-content-start py-2" id="message">
                 <p class="mb-0 fs-14" id="heading">\(a^2 + b^2 = (a - b)(a + b)\)</p>
-                <!-- <p class="mb-0 fs-20">\(\frac{5}{8}\)</p> -->
               </div>
               <div class="item justify-content-start py-2 response" id="response">
                 <p class="mb-0 fs-14" id="heading">\(a^2 + b^2 = (a - b)(a + b)\)</p>
-                <!-- <p class="mb-0 fs-20">\(\frac{5}{8}\)</p> -->
-              </div>
+              </div> -->
             </div>
           </div>
           <div
@@ -167,12 +166,14 @@
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/jquery-3.7.1.min.js"></script>
     <script>
+      
       function scrollToBottom() {
         var container = document.getElementById('container');
         container.scrollTop = container.scrollHeight;
       }
-      function appendCommand(){
-        $('#command, #message, #response').removeAttr('id');
+
+      function appendInput(){
+        $('#input, #output').removeAttr('id');
 
         var div = $('<div>', {
           'class': 'item justify-content-end py-2'
@@ -180,7 +181,7 @@
 
         var paragraph = $('<p>', {
           'class': 'mb-0 fs-20',
-          'id': 'command',
+          'id': 'input',
           html: ''
         });
 
@@ -189,71 +190,49 @@
         $('#parent').append(div);
       }
 
-      function appendMessage(){
-        $('#command, #message, #response').removeAttr('id');
-
-        var div = $('<div>', {
-          'class': 'item justify-content-end py-2',
-        });
-
-        var paragraph = $('<p>', {
-          'class': 'mb-0 fs-20',
-          'id': 'message',
-          html: ''
-        });
-
-        div.append(paragraph);
-
-        $('#parent').append(div);
-      }
-
-      function appendResponse(data)
+      function appendOutput(data)
       {
-        $('#command, #message, #response').removeAttr('id');
-            // Create a <div> element with the specified class and id
-            var div = $('<div>', {
-              'class': 'item justify-content-end py-2 response'
-            });
+          $('#input, #output').removeAttr('id');
+          // Create a <div> element with the specified class and id
+          var div = $('<div>', {
+            'class': 'item justify-content-start py-2 response'
+          });
 
-            // Create a <p> element with the specified class and content
-            var paragraph = $('<p>', {
-              'class': 'mb-0 fs-20',
-              'id': 'response',
-              html: '...'
-            });
+          // Create a <p> element with the specified class and content
+          var paragraph = $('<p>', {
+            'class': 'mb-0 fs-20',
+            'id': 'output',
+            html: '...'
+          });
 
-            // Append the <p> element to the <div> element
-            div.append(paragraph);
+          // Append the <p> element to the <div> element
+          div.append(paragraph);
 
-            // Append the <div> element to the desired parent element (e.g., body)
-            $('#parent').append(div);
-        $.ajax({
-          url: 'http://localhost/testapi/index.html',
-          type: 'POST',
-          contentType: 'application/json',
-          data: data, // Replace with your data object
-          success: function(response) {
-            console.log('Response:', response);
-            $('#response').html(response);
-            appendCommand();
-            // Handle the response data here
-          },
-          error: function(xhr, status, error) {
-            console.error('Error:', error);
-            // Handle the error here
-          }
-        });
-
+          // Append the <div> element to the desired parent element (e.g., body)
+          $('#parent').append(div);
+          console.log("Posting data:"+input);
+          $.ajax({
+            url: 'http://localhost/testapi/index.html',
+            type: 'POST',
+            contentType: 'application/json',
+            data: data, // Replace with your data object
+            success: function(response) {
+              console.log('Response:', response);
+              $('#output').html(response);
+              appendInput();
+              // Handle the response data here
+            },
+            error: function(xhr, status, error) {
+              console.error('Error:', error);
+              // Handle the error here
+            }
+          });
       }
 
-      var skipKeys=["Shift","Alt","Control"];
-      var inputTypes = ["command","message","response"];
+      var skipKeys=["Shift","Alt"];
       var input = "";
-      var inputType = "command";
-      var inputIndex = 0;
-      var inputMode = "";
 
-      appendCommand();
+      appendInput();
 
   
       // Event listener to capture keydown events
@@ -263,36 +242,74 @@
         if(skipKeys.indexOf(key) !== -1){}
         else if(key==='Enter')
         {
-          if(inputIndex==0)
-          {
-            if(input=="ASK" || input=="ask")
-            {
-              inputMode = "ASK";
-              appendMessage();
-              inputIndex++;
-              inputType = inputTypes[inputIndex];
-              input = "";
-            }
-            else{
-              const elem = document.getElementById(inputType);
-              elem.textContent += " : Invalid Command";
-              appendCommand();
-              input="";
-            }
-          }
-          else if(inputIndex==1)
-          {
-            appendResponse(input);
+            appendOutput(input);
             input="";
-            inputIndex=0;
-            inputType = inputTypes[inputIndex];
-          }
-        }else{
-          const elem = document.getElementById(inputType);
+        }
+        else if(key==='Control')
+        {
+            input="Capturing...";
+            $('#input').text(input);
+            input="";
+            //var imageUrl = 'http://172.25.75.246:5000/capture';
+            var imageUrl = 'http://localhost:5000/capture';
+            $.ajax({
+              url: imageUrl,
+              xhrFields: {
+                  responseType: 'blob'
+              },
+              success: function(blob) {
+                  var reader = new FileReader();
+                  reader.onload = function() {
+                      var base64data = reader.result;
+                      var imgElement = $('<img>');
+                      imgElement.attr('src', base64data);
+                      imgElement.attr('width', 150);
+                      imgElement.attr('height', 150);
+                      $('#parent').append(imgElement);
+                      $('#input').text("Captured!");
+                      appendInput();
+                      $('#input').text("Running OCR!");
+                      scrollToBottom();
+                      Tesseract.recognize(
+                          base64data,
+                          'eng', // Specify language for OCR (e.g., English)
+                          { logger: m => console.log(m) } // Optional logger for debugging
+                      ).then(function(result) {
+                          console.log('OCR Result:', result.data.text);
+                          if(result.text)
+                          {
+                            $('#input').text("OCR:"+result.data.text);
+                          }else{
+                            $('#input').text("No Text Found In Image.");
+                          }
+                          // Display OCR result on the webpage
+                          //$('#ocrResult').text(result.text);
+                      }).catch(function(error) {
+                          console.error('Error performing OCR:', error);
+                      });
+                  };
+                  reader.readAsDataURL(blob);
+              },
+              error: function(xhr, status, error) {
+                  console.error('Error loading image:', error);
+                  $('#input').text("Capture Failed!");
+                  appendInput();
+              }
+          });
+        }
+        else if(key==="Backspace")
+        {
+          input = input.slice(0, -1);
+          $('#input').text(input);
+        }
+        else
+        {
+          const elem = document.getElementById("input");
           elem.textContent += key;
           input+=key;
         }
         scrollToBottom();
+        MathJax.typeset();
         // Append the pressed key to the heading text
       });
     </script>
